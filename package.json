@@ -1,25 +1,48 @@
 {
   "name": "timehive",
-  "displayName": "TimeHive",
-  "description": "",
+  "displayName": "时间蜂巢",
+  "description": "提醒小助手",
   "version": "0.0.1",
+  "publisher": "stack-stark-code",
   "engines": {
     "vscode": "^1.99.0"
   },
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "提醒",
+    "小助手",
+    "remind",
+    "Alarm",
+    "Todo",
+    "time"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stack-stark/timehive.git"
+  },
   "activationEvents": [
     "onStartupFinished"
   ],
+  "icon": "resources/logo.png",
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "timehive.helloWorld",
-        "title": "Hello World"
-      }
-    ]
+    "viewsContainers": {
+      "activitybar": [{
+        "id": "timehive",
+        "title": "时间蜂巢",
+        "icon": "resources/timehive.svg"
+      }]
+    },
+    "views": {
+      "时间蜂巢": [
+        {
+          "id": "timehive.view.reminders",
+          "name": "提醒列表"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -52,3 +75,4 @@
     "node-cron": "^3.0.3"
   }
 }
+
