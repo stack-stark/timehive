@@ -1,56 +1,82 @@
 import * as vscode from "vscode";
-const cron = require("node-cron");
 import { ReminderTreeDataProvider } from "./treeViewProvider";
-
-export const reminders = [
-  { time: "30 8-17 * * 1-5", message: "🍵 喝水时间到，请注意补充水分！", remark: "周一到周五每30分钟" },
-  { time: "25 9 * * 1-5", message: "💴 股市即将开盘，请做好准备", remark: "周一到周五9:25" },
-  { time: "55 11 * * 1-5", message: "🍜 准备下班吃饭", remark: "周一到周五9:25" },
-  { time: "45 14 * * 1-5", message: "💰️ 距离收盘还有15分钟，请注意操作", remark: "周一到周五14:45" },
-  { time: "0 18 * * 1-5", message: "👨‍💻 下班时间到，请检查今日工作进度", remark: "周一到周五18:00" },
-  { time: "0 10 * * 5", message: "🎮️ 记得领取本周Epic免费游戏！", remark: "周五10:00"},
-];
+import { Reminder } from "./types";
+import { presetReminders } from "./constants/presetReminders";
+import { CommandHandler } from "./commands/CommandHandler";
+import { StorageService } from "./services/StorageService";
+import { ReminderService } from "./services/ReminderService";
 
 export function activate(context: vscode.ExtensionContext) {
-  const jobs = reminders.map((reminder) => {
-    return cron.schedule(reminder.time, () => {
-      if (isWorkingHours()) {
-        vscode.window.showInformationMessage(reminder.message);
-      }
-    });
-  });
+  // 初始化核心服务
+  const storageService = new StorageService(context);
+  const reminderService = new ReminderService();
+  
+  // 获取提醒数据
+  const customReminders: Reminder[] = storageService.getCustomReminders();
+  const reminders: Reminder[] = [
+    ...presetReminders.map((r) => ({ ...r, isActive: true })),
+    ...customReminders,
+  ];
 
-  context.subscriptions.push({
-    dispose: () => jobs.forEach((job) => job.stop()),
-  });
+  // 初始化所有提醒任务
+  reminderService.initializeReminders(reminders);
 
-  const treeDataProvider = new ReminderTreeDataProvider();
+  // 创建提醒事项树视图提供者实例，传入当前所有提醒事项
+  const treeDataProvider = new ReminderTreeDataProvider(reminders);
+  // 注册树视图提供者到VS Code窗口，使用timehive.view.reminders作为视图ID
   vscode.window.registerTreeDataProvider(
     "timehive.view.reminders",
     treeDataProvider
   );
 
-  // 添加定时刷新
+  // 创建命令处理器并注册命令
+  const commandHandler = new CommandHandler(
+    context,
+    reminderService,
+    storageService,
+    reminders,
+    treeDataProvider
+  );
+  commandHandler.registerAddCommand();
+
+  // 切换任务状态
+  context.subscriptions.push(
+    vscode.commands.registerCommand("timehive.toggleReminder", async (item) => {
+      const index = reminders.findIndex(r => r.id === item.reminder.id);
+      if (index !== -1) {
+        const reminder = reminders[index];
+        reminder.isActive = !reminder.isActive;
+        reminderService.toggleTask(reminder.id, reminder);
+        await storageService.updateCustomReminders(customReminders);
+        treeDataProvider.setReminderActiveStatus(index, reminder.isActive);
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("timehive.deleteReminder", async (item) => {
+      const index = reminders.findIndex(r => r.id === item.reminder.id);
+      if (index !== -1) {
+        // 停止并删除对应的定时任务
+        reminderService.stopAndRemoveTask(reminders[index].id);
+
+        // 从主提醒列表中删除该项
+        reminders.splice(index, 1);
+
+        // 更新树视图
+        treeDataProvider.removeReminder(index);
+      }
+    })
+  );
+
+  context.subscriptions.push({
+    dispose: () => reminderService.dispose(),
+  });
+
   const timer = setInterval(() => treeDataProvider.refresh(), 1000 * 60);
   context.subscriptions.push({
     dispose: () => clearInterval(timer),
   });
 }
 
-function isWorkingHours() {
-  const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const day = now.getDay();
-
-  // 周一至周五（1-5）且时间在8:30-18:00之间
-  return (
-    day >= 1 &&
-    day <= 5 &&
-    (hours > 8 || (hours === 8 && minutes >= 30)) &&
-    hours < 18
-  );
-}
-
-// This method is called when your extension is deactivated
 export function deactivate() {}

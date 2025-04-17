@@ -6,7 +6,18 @@ import * as vscode from 'vscode';
 // import * as myExtension from '../../extension';
 
 suite('Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+	const mockContext: vscode.ExtensionContext = {
+		globalState: {
+			get: (key: string) => key === 'customReminders' ? [] : undefined,
+			update: () => Promise.resolve()
+		},
+		subscriptions: []
+	} as any;
+
+	before(() => {
+		vscode.window.showInformationMessage('Start all tests.');
+		require('../../extension').activate(mockContext);
+	});
 
 	test('Sample test', () => {
 		assert.strictEqual(-1, [1, 2, 3].indexOf(5));

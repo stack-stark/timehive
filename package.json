@@ -1,7 +1,7 @@
 {
   "name": "timehive",
   "displayName": "时间蜂巢",
-  "description": "提醒小助手",
+  "description": "一个基于cron表达式的定时任务提醒组手",
   "version": "1.0.0",
   "publisher": "stack-stark-code",
   "engines": {
@@ -28,12 +28,49 @@
   "icon": "resources/logo.png",
   "main": "./dist/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "timehive.toggleReminder",
+        "title": "暂停/恢复"
+      },
+      {
+        "command": "timehive.deleteReminder",
+        "title": "删除"
+      },
+      {
+        "command": "timehive.addReminder",
+        "title": "+ 添加提醒"
+      }
+    ],
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "timehive.toggleReminder",
+          "when": "view == timehive.view.reminders && viewItem =~ /active|inactive/",
+          "group": "inline"
+        },
+        {
+          "command": "timehive.deleteReminder",
+          "when": "view == timehive.view.reminders",
+          "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "timehive.addReminder",
+          "when": "view == timehive.view.reminders",
+          "group": "navigation"
+        }
+      ]
+    },
     "viewsContainers": {
-      "activitybar": [{
-        "id": "timehive",
-        "title": "时间蜂巢",
-        "icon": "resources/timehive.svg"
-      }]
+      "activitybar": [
+        {
+          "id": "timehive",
+          "title": "时间蜂巢",
+          "icon": "resources/timehive.svg"
+        }
+      ]
     },
     "views": {
       "timehive": [
@@ -56,13 +93,13 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
-    
     "lint": "eslint src",
     "test": "vscode-test"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
+    "@types/node-cron": "^3.0.11",
     "@types/vscode": "^1.99.0",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
@@ -74,7 +111,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "uuid": "^11.1.0"
   }
 }
-
