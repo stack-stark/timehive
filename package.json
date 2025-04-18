@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "publisher": "stack-stark-code",
   "engines": {
-    "vscode": "^1.99.0"
+    "vscode": "^1.90.0"
   },
   "categories": [
     "Other"
@@ -100,7 +100,7 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/node-cron": "^3.0.11",
-    "@types/vscode": "^1.99.0",
+    "@types/vscode": "^1.90.0",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
     "@vscode/test-cli": "^0.0.10",
