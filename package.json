@@ -1,8 +1,8 @@
 {
   "name": "timehive",
   "displayName": "时间蜂巢",
-  "description": "一个基于cron表达式的定时任务提醒助手",
-  "version": "1.0.0",
+  "description": "一个基于cron表达式的定时任务提醒助手，使用需关闭编辑器勿扰模式",
+  "version": "1.0.1",
   "publisher": "stack-stark-code",
   "engines": {
     "vscode": "^1.90.0"
