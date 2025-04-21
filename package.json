@@ -1,7 +1,7 @@
 {
   "name": "timehive",
   "displayName": "时间蜂巢",
-  "description": "一个基于cron表达式的定时任务提醒组手",
+  "description": "一个基于cron表达式的定时任务提醒助手",
   "version": "1.0.0",
   "publisher": "stack-stark-code",
   "engines": {
